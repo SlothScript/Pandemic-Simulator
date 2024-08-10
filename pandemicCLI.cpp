@@ -6,7 +6,7 @@
 const long POPULATION_SIZE = 50000;
 const int INITIAL_INFECTED = 5;
 const int DAYS = 25000;
-const float INFECTION_CHANCE = 0.1f;
+const float INFECTION_CHANCE = 0.13f;
 const float FATALITY = 0.01f;
 const float RECOVERY_CHANCE = 0.05f;
 const int maxInfection = 10;
@@ -62,6 +62,8 @@ void simulate_day(Person population[], long size, std::mt19937& gen, std::unifor
             if (dist(gen) >= 0.65) {
                 population[i].quarantined = true;
             }
+        } else {
+            population[i].quarantined = false;
         }
 
         if (population[i].status == 1) { // If infected
