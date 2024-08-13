@@ -5,6 +5,7 @@
 // Simulation settings
 const long POPULATION_SIZE = 50000;
 const int INITIAL_INFECTED = 5;
+const int VIRUS_COMPLEXITY = 3;
 const int DAYS = 25000;
 const float INFECTION_CHANCE = 0.13f;
 const float FATALITY = 0.01f;
