@@ -7,7 +7,7 @@ const long POPULATION_SIZE = 50000;
 const int INITIAL_INFECTED = 5;
 const int VIRUS_COMPLEXITY = 3;
 const int DAYS = 25000;
-const float INFECTION_CHANCE = 0.13f;
+const float INFECTION_CHANCE = 0.23f;
 const float FATALITY = 0.01f;
 const float RECOVERY_CHANCE = 0.05f;
 const int maxInfection = 10;
@@ -15,6 +15,10 @@ const int maxInfection = 10;
 // Counters for population status
 int susceptible = POPULATION_SIZE - INITIAL_INFECTED, infected = INITIAL_INFECTED, recovered = 0, dead = 0;
 int mutations = 0;
+int curePercent = 0;
+int motivation = 1;
+
+bool vaccines = false;
 
 double generate_intelligence_score() {
     double mean = 100.0;
@@ -45,6 +49,8 @@ struct Person {
 
 void virus_mutation(Person population[], float geneticDifference, std::mt19937& gen, std::uniform_real_distribution<>& dist) {
     mutations += 1;
+    motivation += 0.5;
+    curePercent /= (dist(gen) * 100) + 0.0001;
     std::cout << "Virus mutation. Genetic difference: " << geneticDifference << std::endl;
     for (long i  = 0; i < POPULATION_SIZE; i++) {
         if ((dist(gen)) > (1 - geneticDifference)) {
@@ -57,11 +63,27 @@ void virus_mutation(Person population[], float geneticDifference, std::mt19937& 
 
 // Function to simulate one day
 void simulate_day(Person population[], long size, std::mt19937& gen, std::uniform_real_distribution<>& dist) {
+    // Cure tick
+    curePercent += (dist(gen) * motivation) / VIRUS_COMPLEXITY;
+    if (curePercent >= 100) {
+        std::cout << "Virus cured!" << std::endl;
+        vaccines = true;
+    }
+
+    if (vaccines) {
+        for (long i = 0; i < size; i++) {
+            if (dist(gen) >= 0.5 + (population[i].intelligence/100)) {
+                population[i].status = ((population[i].status == 0 || population[i].status == 2) && population[i].status != 3) ? 2 : 0;
+            }
+        }
+    }
+
     for (long i = 0; i < size; i++) {
         if (population[i].intelligence >= 105 && population[i].status == 1) {
             // Infected and going to quarantine.
             if (dist(gen) >= 0.65) {
                 population[i].quarantined = true;
+                motivation += 0.02;
             }
         } else {
             population[i].quarantined = false;
@@ -81,8 +103,10 @@ void simulate_day(Person population[], long size, std::mt19937& gen, std::unifor
             // Recovery or death
             if (dist(gen) < RECOVERY_CHANCE) { // 5% recovery chance
                 population[i].status = 2;
+                motivation -= 0.002;
             } else if (dist(gen) < FATALITY) { // 1% death chance
                 population[i].status = 3;
+                motivation += 0.1;
             }
         }
     }
@@ -110,7 +134,12 @@ void print_end_statistics(int day, int recovered, int dead, int susceptible, clo
               << "Dead: " << dead << std::endl
               << "Virus mutations: " << mutations << std::endl
               << std::endl
-              << "Time taken to simulate: " << duration << std::endl;
+              << "Time taken to simulate: " << duration << std::endl
+              << std::endl
+              << (vaccines ? "Vaccines have been distributed" : "Vaccines have not been distributed") << std::endl
+              << (!vaccines ? ("Cure percent: " + std::to_string(curePercent) + "%") : "") << std::endl
+              << "Motivation: " << motivation << std::endl;
+
 }
 
 int main() {
