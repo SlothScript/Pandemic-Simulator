@@ -258,7 +258,7 @@ int main() {
         SDL_RenderPresent(renderer);
 
         if (pandemicOver) {
-            std::string finalMessage = "Pandemic simulation finished. Press X to exit.";
+            std::string finalMessage = "Pandemic simulation finished.";
             drawText(renderer, font, finalMessage, 10, height - 40);
             SDL_RenderPresent(renderer);
         }
